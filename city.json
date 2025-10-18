@@ -1,0 +1,23 @@
+{
+  "India": [
+    { "city": "Delhi", "latitude": 28.6100, "longitude": 77.2300 },
+    { "city": "Mumbai", "latitude": 19.0761, "longitude": 72.8774 },
+    { "city": "Bangalore", "latitude": 12.9716, "longitude": 77.5946 },
+    { "city": "Kolkata", "latitude": 22.5726, "longitude": 88.3639 },
+    { "city": "Hyderabad", "latitude": 17.3850, "longitude": 78.4867 },
+    { "city": "Ahmedabad", "latitude": 23.0225, "longitude": 72.5714 },
+    { "city": "Pune", "latitude": 18.5204, "longitude": 73.8567 },
+    { "city": "Jaipur", "latitude": 26.9124, "longitude": 75.7873 },
+    { "city": "Lucknow", "latitude": 26.8467, "longitude": 80.9462 },
+    { "city": "Thiruvananthapuram", "latitude": 8.5241, "longitude": 76.9366 },
+    { "city": "Surat", "latitude": 21.1702, "longitude": 72.8311 },
+    { "city": "Guwahati", "latitude": 26.1445, "longitude": 91.7362 },
+    { "city": "Shimla", "latitude": 31.1048, "longitude": 77.1734 },
+    { "city": "Varanasi", "latitude": 25.3176, "longitude": 82.9739 },
+    { "city": "Srinagar", "latitude": 34.0837, "longitude": 74.7973 },
+    { "city": "Uttarkashi", "latitude": 30.7298, "longitude": 78.4434 },
+    { "city": "Begusarai", "latitude": 25.4185, "longitude": 86.1339 },
+    { "city": "Coimbatore", "latitude": 11.0168, "longitude": 76.9558 }
+  ]
+}
+

@@ -1,0 +1,26 @@
+configuration:
+  - output_file_location:
+      aws_conn_id: 'weather_bucket_s3_conn'
+      bucket_name: 'weatherbucket-yml'
+      file_path: 'weather_data/output/uv/[processing_week]/'
+      file_name: 'uv_op_data[current_date].csv'
+
+  - postgres_schema:
+      connection_id: 'postgres_localhost'
+      database: 'weather_db'
+      table: 'uv_table'
+      schema:
+        - name: city_date_key
+          type: TEXT
+        - name: city_name
+          type: TEXT
+        - name: hourly_time
+          type: TIMESTAMP
+        - name: time_recorded
+          type: TIMESTAMP
+        - name: precipitation_mm
+          type: DOUBLE PRECISION
+        - name: rain_mm
+          type: DOUBLE PRECISION
+        - name: uv_index
+          type: DOUBLE PRECISION

@@ -1,0 +1,20 @@
+datasets:
+  hourly:
+    iterate_over: list_items
+    city_path: "$.key"
+    root_path: "$['days'][0][hours][*]"
+    mappings:
+      time: $.datetime
+      dt: $.datetimeEpoch
+      temp: $.temp
+      feels_like: $.feelslike
+      conditions: $.conditions
+      icon: $.icon
+      humidity: $.humidity
+      pressure: $.pressure
+      visibility: $.visibility
+      windspeed: $.windspeed
+      windgust: $.windgust
+      winddir: $.winddir
+      precip: $.precip
+      precipprob: $.precipprob

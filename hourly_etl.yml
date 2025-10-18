@@ -1,0 +1,161 @@
+transform_rules:
+  - add_dataframe:
+      dataframe: 'df_hourly_weather_data'
+      file_path: 's3://weatherbucket-yml/weather_data/input/preprocessing/hourly/{processing_week}/'
+      file_name_hint: 'hourly_weather_data_{current_date}'
+      file_type: 'csv'
+
+  - drop_duplicate:
+      dataframe: 'df_hourly_weather_data'
+      keep: 'first'
+      subset: None
+
+  - dropna:
+      dataframe: 'df_hourly_weather_data'
+      how: 'any'
+      subset: None
+      thresh: null
+
+  - date_formatting:
+      dataframe: 'df_hourly_weather_data'
+      columns:
+      - source: dt
+        target: dt
+        format: "%Y-%m-%d"
+  
+  - type_casting:
+      dataframe: 'df_hourly_weather_data'
+      dtype_mappings:
+        city: "string"
+        temp: "float64"
+        feels_like: "float64"
+        conditions: "string"
+        icon: "object"
+        humidity: "int64"
+        pressure: "int64"
+        visibility: "float64"
+        windspeed: "float64"
+        windgust: "float64"
+        winddir: "float64"
+        precip: "float64"
+        precipprob: "float64"
+
+
+  - derived_columns:
+      dataframe: 'df_hourly_weather_data'
+      rules:
+
+        humidity_level: |
+            np.select(
+                [df['humidity'] >= 80, df['humidity'] >= 60, df['humidity'] >= 30],
+                ['High', 'Moderate', 'Comfortable'],
+                default='Low'
+            )
+
+        icon_url: |
+            np.select(
+              [
+                df["icon"] == "clear-day",
+                df["icon"] == "clear-night",
+                df["icon"] == "cloudy",
+                df["icon"] == "fog",
+                df["icon"] == "partly-cloudy-day",
+                df["icon"] == "partly-cloudy-night",
+                df["icon"] == "rain",
+                df["icon"] == "thunder-rain",
+                df["icon"] == "thunder"
+              ],
+              [
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/cloudy.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/fog.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/rain2.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder-rain.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder.png"
+              ],
+              default="NA"
+            )
+    
+        wind_category: |
+            np.select(
+              [
+                  df["windspeed"] < 1,
+                  df["windspeed"] < 6,
+                  df["windspeed"] < 12,
+                  df["windspeed"] < 20,
+                  df["windspeed"] < 29,
+                  df["windspeed"] < 39,
+                  df["windspeed"] < 50,
+                  df["windspeed"] < 62,
+                  df["windspeed"] < 75,
+                  df["windspeed"] < 89,
+                  df["windspeed"] < 103,
+                  df["windspeed"] < 118,
+              ],
+              [
+                  "Calm",
+                  "Light Air",
+                  "Light Breeze",
+                  "Gentle Breeze",
+                  "Moderate Breeze",
+                  "Fresh Breeze",
+                  "Strong Breeze",
+                  "Near Gale",
+                  "Gale",
+                  "Strong Gale",
+                  "Storm",
+                  "Violent Storm",
+              ],
+              default="Hurricane"
+            )
+
+        city_date_key: |
+            df['city'].astype(str) + '_' + df['dt'].astype(str)
+
+  - renaming_columns:
+      dataframe: 'df_hourly_weather_data'
+      rename_columns:
+        city: city_name
+        dt: time_recorded
+        time: hourly_time
+        temp: temp_celcius
+        feels_like: feels_like_temp_celcius
+        conditions: weather_condition
+        humidity: humidity_percentage
+        pressure: pressure_hpa
+        visibility: visibility_km
+        windspeed: wind_speed
+        windgust: wind_gust
+        winddir: wind_direction
+        precip: precipitation
+        precipprob: precipitation_probability 
+
+  - reorder_columns:
+      dataframe: 'df_hourly_weather_data'
+      columns: 
+        - city_date_key
+        - city_name
+        - time_recorded
+        - hourly_time
+        - temp_celcius
+        - feels_like_temp_celcius
+        - weather_condition
+        - humidity_percentage
+        - humidity_level
+        - pressure_hpa
+        - visibility_km
+        - wind_speed
+        - wind_category
+        - wind_gust
+        - wind_direction
+        - precipitation
+        - precipitation_probability
+        - icon
+        - icon_url
+
+
+
+

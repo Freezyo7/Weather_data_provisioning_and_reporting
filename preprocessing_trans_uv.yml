@@ -1,0 +1,10 @@
+datasets:
+  uv:
+    iterate_over: hourly_data
+    city_path: "$.key"
+    root_path: "$['hourly'][*]"
+    mappings: 
+      time: "$.time"
+      precipitation: "$.precipitation"
+      rain: "$.rain"
+      uv: "$.uv_index"

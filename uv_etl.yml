@@ -1,0 +1,71 @@
+transform_rules:
+  - add_dataframe:
+      dataframe: "df_uv_weather_data"
+      file_path: 's3://weatherbucket-yml/weather_data/input/preprocessing/uv/{processing_week}/'
+      file_name_hint: 'uv_precipitation_weather_data_{current_date}'
+      file_type: 'csv'
+  
+  - drop_duplicate:
+      dataframe: 'df_uv_weather_data'
+      keep: 'first'
+      subset: None
+  
+  - drop_na:
+      dataframe: 'df_uv_weather_data'
+      how: 'any'
+      subset: None
+      thresh: null
+  
+  - date_formatting:
+      dataframe: 'df_uv_weather_data'
+      columns:
+        - source: time
+          target: dt
+          format: "%Y-%m-%d"
+          input_type: uv
+        
+        - source: time
+          target: hourly_time
+          format: "%H:%M:%S"
+          input_type: uv
+          
+
+  - type_casting: 
+      dataframe: 'df_uv_weather_data'
+      dtype_mappings:
+        precipitation: "float64"
+        rain: "float64"
+        uv: "float64"
+        city: "string"
+  
+  - derived_columns:
+      dataframe: 'df_uv_weather_data'
+      rules:
+        city_date_key: |
+            df['city'].astype(str) + '_' + df['dt'].astype(str)
+
+  - handle_missing:
+      dataframe : 'df_uv_weather_data'
+      method: drop  # or fill
+      fill_value: null
+
+  - renaming_columns:
+      dataframe: 'df_uv_weather_data'
+      rename_columns:
+        city: city_name
+        dt: time_recorded
+        precipitation: precipitation_mm
+        rain: rain_mm
+        uv: uv_index
+  
+  - reorder_columns:
+      dataframe: 'df_uv_weather_data'
+      columns:
+        - city_date_key
+        - city_name
+        - hourly_time
+        - time_recorded
+        - precipitation_mm
+        - rain_mm
+        - uv_index
+

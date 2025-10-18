@@ -1,0 +1,12 @@
+datasets:
+  forecast:
+    iterate_over: seven_days
+    city_path: "$.key"
+    root_path: "$.days[*]"
+    mappings:
+      datetime: $.datetime
+      dt: $.datetimeEpoch
+      tempmax: $.tempmax
+      tempmin: $.tempmin
+      precipprob: $.precipprob
+      icon: $.icon

@@ -1,0 +1,50 @@
+configuration:
+  - output_file_location:
+      aws_conn_id: 'weather_bucket_s3_conn'
+      bucket_name: 'weatherbucket-yml'
+      file_path: 'weather_data/output/hourly/[processing_week]/'
+      file_name: 'hourly_op_data[current_date].csv'
+  
+  - postgres_schema:
+      connection_id: 'postgres_localhost'
+      database: 'weather_db'
+      table: 'hourly_table'
+      schema:
+      - name: city_date_key
+        type: TEXT
+      - name: city_name
+        type: TEXT
+      - name: time_recorded
+        type: TIMESTAMP
+      - name: hourly_time
+        type: TIMESTAMP
+      - name: temp_celcius
+        type: DOUBLE PRECISION
+      - name: feels_like_temp_celcius
+        type: DOUBLE PRECISION
+      - name: weather_condition
+        type: TEXT
+      - name: humidity_percentage
+        type: DOUBLE PRECISION
+      - name: humidity_level
+        type: TEXT
+      - name: pressure_hpa
+        type: DOUBLE PRECISION
+      - name: visibility_km
+        type: DOUBLE PRECISION
+      - name: wind_speed
+        type: DOUBLE PRECISION
+      - name: wind_category
+        type: TEXT
+      - name: wind_gust
+        type: DOUBLE PRECISION
+      - name: wind_direction
+        type: DOUBLE PRECISION
+      - name: precipitation
+        type: DOUBLE PRECISION
+      - name: precipitation_probability
+        type: DOUBLE PRECISION
+      - name: icon
+        type: TEXT
+      - name: icon_url
+        type: TEXT

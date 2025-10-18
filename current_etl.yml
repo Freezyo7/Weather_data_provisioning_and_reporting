@@ -1,0 +1,265 @@
+transform_rules:
+  - add_dataframe: 
+      dataframe: 'df_current_weather_data'
+      file_path: 's3://weatherbucket-yml/weather_data/input/preprocessing/current/{processing_week}/'
+      file_name_hint: 'current_weather_data_{current_date}'
+      file_type: 'csv'
+      get_source_filename: 'True'
+      get_source_filedate: 'True'
+  
+  - dropna:
+      dataframe: 'df_current_weather_data'
+      how: "any"
+      subset: [temp, city, dt]
+
+  - date_formatting:
+      dataframe: 'df_current_weather_data'
+      columns:
+      - source: dt
+        target: dt
+        format: "%Y-%m-%d"
+      - source: sunriseEpoch
+        target: sunriseEpoch
+        format: "%Y-%m-%d %H:%M"
+      - source: sunsetEpoch
+        target: sunsetEpoch
+        format: "%Y-%m-%d %H:%M"
+  
+  - type_casting:
+      dataframe: 'df_current_weather_data'
+      dtype_mappings:
+        temp: "float64"
+        feelslike: "float64"
+        tempmax: "float64"
+        tempmin: "float64"
+        dew: "float64"
+        humidity: "int64"
+        pressure: "int64"
+        cloudcover: "float64"
+        visibility: "int64"
+        windspeed: "float64"
+        winddir: "int64"
+        windgust: "float64"
+        solarradiation: "float64"
+        solarenergy: "float64"
+        severerisk: "string"
+        snowdepth: "float64"
+        moonphase: "float64"
+        icon: "object"
+        conditions: "string"
+        description: "string"
+        city: "string"
+
+  - derived_columns:
+      dataframe: 'df_current_weather_data'
+      rules: 
+          is_extreme_temp: |
+            (temp > 45) | (temp < 5)
+
+          wind_category: |
+            np.select(
+              [
+                  df["windspeed"] < 1,
+                  df["windspeed"] < 6,
+                  df["windspeed"] < 12,
+                  df["windspeed"] < 20,
+                  df["windspeed"] < 29,
+                  df["windspeed"] < 39,
+                  df["windspeed"] < 50,
+                  df["windspeed"] < 62,
+                  df["windspeed"] < 75,
+                  df["windspeed"] < 89,
+                  df["windspeed"] < 103,
+                  df["windspeed"] < 118,
+              ],
+              [
+                  "Calm",
+                  "Light Air",
+                  "Light Breeze",
+                  "Gentle Breeze",
+                  "Moderate Breeze",
+                  "Fresh Breeze",
+                  "Strong Breeze",
+                  "Near Gale",
+                  "Gale",
+                  "Strong Gale",
+                  "Storm",
+                  "Violent Storm",
+              ],
+              default="Hurricane"
+            )
+          
+          cloud_category : |
+            np.select(
+              [
+                df["cloudcover"] <= 10,
+                df["cloudcover"] <= 25,
+                df["cloudcover"] <= 50,
+                df["cloudcover"] <= 69,
+                df["cloudcover"] <= 100,
+              ],
+              ["Clear", "Mostly Clear", "Partly Cloudy", "Mostly Cloudy", "Overcast"],
+              default="Unknown"
+            )
+
+          moon_phase_desc: |
+            np.select(
+              [
+                df["moonphase"] == 0,
+                (df["moonphase"] > 0) & (df["moonphase"] < 0.25),
+                df["moonphase"] == 0.25,
+                (df["moonphase"] > 0.25) & (df["moonphase"] < 0.5),
+                df["moonphase"] == 0.5,
+                (df["moonphase"] > 0.5) & (df["moonphase"] < 0.75),
+                df["moonphase"] == 0.75,
+                (df["moonphase"] > 0.75) & (df["moonphase"] < 1),
+                df["moonphase"] == 1,
+              ],
+              [
+                "New Moon",
+                "Waxing Crescent",
+                "First Quarter",
+                "Waxing Gibbous",
+                "Full Moon",
+                "Waning Gibbous",
+                "Last Quarter",
+                "Waning Crescent",
+                "New Moon",
+              ],
+              default="Unknown"
+            )
+
+          air_quality: |
+            np.select(
+              [df['visibility'] > 10, df['visibility'] >= 4],
+              ['Good', 'Moderate'],
+              default='Poor'
+            )
+          
+          day_length: |
+            pd.to_datetime(df['sunsetEpoch']) - pd.to_datetime(df['sunriseEpoch'])
+
+          wind_direction: |
+            df['winddir'].apply(
+              lambda deg: 'North' if (deg >= 337.5 or deg < 22.5) else
+                          'North-East' if deg < 67.5 else
+                          'East' if deg < 112.5 else
+                          'South-East' if deg < 157.5 else
+                          'South' if deg < 202.5 else
+                          'South-West' if deg < 247.5 else
+                          'West' if deg < 292.5 else
+                          'North-West'
+            )
+          
+
+          heat_index: |
+            0.5 * (df['temp'] + 61.0 + (df['temp'] - 68.0) * 1.2 + (df['humidity'] * 0.094))
+
+          city_date_key: |
+            df['city'].astype(str) + '_' + df['dt'].astype(str)
+          
+          icon_url: |
+            np.select(
+              [
+                df["icon"] == "clear-day",
+                df["icon"] == "clear-night",
+                df["icon"] == "cloudy",
+                df["icon"] == "fog",
+                df["icon"] == "partly-cloudy-day",
+                df["icon"] == "partly-cloudy-night",
+                df["icon"] == "rain",
+                df["icon"] == "thunder-rain",
+                df["icon"] == "thunder"
+              ],
+              [
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/cloudy.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/fog.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/rain2.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder-rain.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder.png"
+              ],
+              default="NA"
+            )
+                
+  - handle_missing:
+      dataframe : 'df_current_weather_data'
+      method: drop  # or fill
+      fill_value: null
+  
+  - drop_columns:
+      dataframe: 'df_current_weather_data'
+      columns:
+        precipcover
+        precip
+        precipprob
+        preciptype
+  
+  - renaming_columns:
+      dataframe: 'df_current_weather_data'
+      rename_columns:
+        city: city_name
+        conditions: weather_condition
+        description: weather_description
+        temp: temp_celcius
+        feelslike: feels_like_temp_celcius
+        tempmax: max_temp_celcius
+        tempmin: min_temp_celcius
+        dew: dew_point
+        humidity: humidity_percentage
+        pressure: pressure_hpa
+        cloudcover: cloud_coverage_percentage
+        visibility: visibility_km
+        windspeed: wind_speed
+        winddir: wind_deg
+        windgust: wind_gust
+        solarradiation: solar_radiation
+        solarenergy: solar_energy
+        sunriseEpoch: sunrise_time
+        sunsetEpoch: sunset_time
+        moonphase: moon_phase
+        dt: time_recorded
+    
+  - drop_duplicate:
+      dataframe: 'df_current_weather_data'
+      keep: 'first'
+      subset: [city_date_key]
+
+  - reorder_columns:
+      dataframe: 'df_current_weather_data'
+      columns:
+      - city_date_key
+      - city_name
+      - weather_condition
+      - weather_description
+      - temp_celcius
+      - feels_like_temp_celcius
+      - is_extreme_temp
+      - max_temp_celcius
+      - min_temp_celcius
+      - dew_point
+      - humidity_percentage
+      - heat_index
+      - pressure_hpa
+      - cloud_coverage_percentage
+      - cloud_category
+      - visibility_km
+      - air_quality
+      - wind_speed
+      - wind_category
+      - wind_deg
+      - wind_direction
+      - wind_gust
+      - solar_radiation
+      - solar_energy
+      - time_recorded
+      - sunrise_time
+      - sunset_time
+      - moon_phase
+      - moon_phase_desc
+      - day_length
+      - icon
+      - icon_url

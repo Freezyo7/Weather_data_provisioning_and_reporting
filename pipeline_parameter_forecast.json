@@ -1,0 +1,21 @@
+{
+    "bucket_name": "weatherbucket-yml",
+    "configuration": "s3://weatherbucket-yml/weather_data/Automation/configuration/",
+    "aws_conn_id": "weather_bucket_s3_conn",    
+
+    "city_list": "s3://weatherbucket-yml/weather_data/Automation/configuration/city/city.json",
+
+    "source_path": "weather_data/input/raw_data/forecast/",
+    "source_file_name": "forecast_weather_data{today}",
+    "source_file_extension": ".json",
+
+    "current_transformation_file_loc": "weather_data/Automation/configuration/forecast/preprocessing/preprocessing_trans_forecast.yml",
+    
+    "preprocessing_file_name": "forecast_weather_data_{today}",
+    "preprocessing_file_extension": ".csv",
+    "preprocessing_storage_path": "weather_data/input/preprocessing/",
+    
+    "no_of_fields": [19],
+    
+    "primary_key": "city"
+}

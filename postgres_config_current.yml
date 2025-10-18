@@ -1,0 +1,84 @@
+configuration:
+  - output_file_location:
+      aws_conn_id: 'weather_bucket_s3_conn'
+      bucket_name: 'weatherbucket-yml'
+      file_path: 'weather_data/output/current/[processing_week]/'
+      file_name: 'current_op_data[current_date].csv'
+
+  - postgres_schema:
+      connection_id: 'postgres_localhost'
+      database: 'weather_db'
+      table: 'current_table'
+      schema:
+      - name: city_date_key
+        type: TEXT
+      - name: city_name
+        type: TEXT
+      - name: weather_condition
+        type: TEXT
+      - name: weather_description
+        type: TEXT
+      - name: temp_celcius
+        type: DECIMAL
+      - name: feels_like_temp_celcius
+        type: DECIMAL
+      - name: is_extreme_temp
+        type: TEXT
+      - name: max_temp_celcius
+        type: DECIMAL
+      - name: min_temp_celcius
+        type: DECIMAL
+      - name: dew_point
+        type: DECIMAL
+      - name: humidity_percentage
+        type: DECIMAL
+      - name: heat_index
+        type: DECIMAL
+      - name: pressure_hpa
+        type: INTEGER
+      - name: cloud_coverage_percentage
+        type: DECIMAL
+      - name: cloud_category
+        type: TEXT
+      - name: visibility_km
+        type: INTEGER
+      - name: air_quality
+        type: TEXT
+      - name: wind_speed
+        type: DECIMAL
+      - name: wind_category
+        type: TEXT
+      - name: wind_deg
+        type: DECIMAL
+      - name: wind_direction
+        type: TEXT
+      - name: wind_gust
+        type: DECIMAL
+      - name: solar_radiation
+        type: DECIMAL
+      - name: solar_energy
+        type: DECIMAL
+      - name: time_recorded
+        type: TIMESTAMP
+      - name: sunrise_time
+        type: TIMESTAMP
+      - name: sunset_time
+        type: TIMESTAMP
+      - name: moon_phase
+        type: DECIMAL
+      - name: moon_phase_desc
+        type: TEXT
+      - name: day_length
+        type: TEXT
+      - name: icon
+        type: TEXT
+      - name: icon_url
+        type: TEXT
+
+
+        
+  - upsert:
+      type: upsert
+      conflict_keys: [city_date_key]
+      update_columns: ['temp_celcius', 'humidity_percentage']
+

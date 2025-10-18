@@ -1,0 +1,40 @@
+configuration:
+  - output_file_location:
+      aws_conn_id: 'weather_bucket_s3_conn'
+      bucket_name: 'weatherbucket-yml'
+      file_path: 'weather_data/output/pollution/[processing_week]/'
+      file_name: 'pollution_op_data[current_date].csv'
+
+  - postgres_schema:
+      connection_id: 'postgres_localhost'
+      database: 'weather_db'
+      table: 'pollution_table'
+      schema:
+      - name: city_date_key
+        type: TEXT
+      - name: city_name
+        type: TEXT
+      - name: aqi
+        type: INTEGER
+      - name: aqi_des
+        type: TEXT
+      - name: co
+        type: DOUBLE PRECISION
+      - name: "no"
+        type: DOUBLE PRECISION
+      - name: no2
+        type: DOUBLE PRECISION
+      - name: o3
+        type: DOUBLE PRECISION
+      - name: so2
+        type: DOUBLE PRECISION
+      - name: pm2_5
+        type: DOUBLE PRECISION
+      - name: pm10
+        type: DOUBLE PRECISION
+      - name: nh3
+        type: DOUBLE PRECISION
+      - name: pollution_source
+        type: TEXT
+      - name: time_recorded
+        type: TIMESTAMP

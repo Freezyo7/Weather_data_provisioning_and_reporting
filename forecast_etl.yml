@@ -1,0 +1,99 @@
+transform_rules:
+  - add_dataframe: 
+      dataframe: 'df_forecast_weather_data'
+      file_path: 's3://weatherbucket-yml/weather_data/input/preprocessing/forecast/{processing_week}/'
+      file_name_hint: 'forecast_weather_data{current_date}'
+      file_type: 'csv'
+      get_source_filename: 'True'
+      get_source_filedate: 'True'
+  
+  - drop_na:
+      dataframe: 'df_forecast_weather_data'
+      how: "any"
+      subset: [tempmax, tempmin, city, dt]
+  
+  - date_formatting:
+      dataframe: 'df_forecast_weather_data'
+      columns:
+      - source: dt
+        target: dt
+        format: "%Y-%m-%d"
+  
+  - type_casting:
+      dataframe: 'df_forecast_weather_data'
+      dtype_mappings:
+        tempmax: "float64"
+        tempmin: "float64"
+        precipprob: "float64"
+        icon: "object"
+        city: "string"
+  
+  - derived_columns:
+      dataframe: 'df_forecast_weather_data'
+      rules: 
+        city_date_key: |
+            df['city'].astype(str) + '_' + df['dt'].astype(str)
+        
+        icon_url: |
+            np.select(
+              [
+                df["icon"] == "clear-day",
+                df["icon"] == "clear-night",
+                df["icon"] == "cloudy",
+                df["icon"] == "fog",
+                df["icon"] == "partly-cloudy-day",
+                df["icon"] == "partly-cloudy-night",
+                df["icon"] == "rain",
+                df["icon"] == "thunder-rain",
+                df["icon"] == "thunder"
+              ],
+              [
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/clear-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/cloudy.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/fog.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-day.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/partly-cloudy-night.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/rain2.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder-rain.png",
+                "https://weatherbucket-yml.s3.amazonaws.com/weather_data/Icon/thunder.png"
+              ],
+              default="NA"
+            )
+
+  - handle_missing:
+      dataframe : 'df_forecast_weather_data'
+      method: drop  # or fill
+      fill_value: null
+  
+  - renaming_columns:
+      dataframe: 'df_forecast_weather_data'
+      rename_columns:
+        city: city_name
+        tempmax: temp_max_celcius
+        tempmin: temp_min_celcius
+        precipprob: precipitation_probability
+        dt: time_recorded
+        datetime: daily_time
+
+  - drop_columns:
+      dataframe: 'df_forecast_weather_data'
+      columns:
+        daily_time
+  
+  - reorder_columns:
+      dataframe: 'df_forecast_weather_data'
+      columns:
+        - city_date_key
+        - city_name
+        - time_recorded
+        - daily_time
+        - temp_max_celcius
+        - temp_min_celcius
+        - precipitation_probability
+        - icon
+        - icon_url
+
+
+
+  

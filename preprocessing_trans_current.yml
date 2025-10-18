@@ -1,0 +1,31 @@
+datasets:
+  current:
+    iterate_over: days
+    root_path: "$['days'][*]"
+    mappings:
+      dt: $.datetimeEpoch
+      temp: $.temp
+      feelslike: $.feelslike
+      tempmax: $.tempmax
+      tempmin: $.tempmin
+      dew: $.dew
+      humidity: $.humidity
+      pressure: $.pressure
+      cloudcover: $.cloudcover
+      visibility: $.visibility
+      windspeed: $.windspeed
+      winddir: $.winddir
+      windgust: $.windgust
+      precip: $.precip
+      precipprob: $.precipprob
+      precipcover: $.precipcover
+      solarradiation: $.solarradiation
+      solarenergy: $.solarenergy
+      severerisk: $.severerisk
+      snowdepth: $.snowdepth
+      sunriseEpoch: $.sunriseEpoch
+      sunsetEpoch: $.sunsetEpoch
+      moonphase: $.moonphase
+      conditions: $.conditions
+      description: $.description
+      icon: $.icon

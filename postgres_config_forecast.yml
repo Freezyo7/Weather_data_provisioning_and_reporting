@@ -1,0 +1,28 @@
+configuration:
+  - output_file_location:
+      aws_conn_id: 'weather_bucket_s3_conn'
+      bucket_name: 'weatherbucket-yml'
+      file_path: 'weather_data/output/forecast/[processing_week]/'
+      file_name: 'forecast_op_data[current_date].csv'
+
+  - postgres_schema:
+      connection_id: 'postgres_localhost'
+      database: 'weather_db'
+      table: 'forecast_table'
+      schema:
+      - name: city_date_key
+        type: TEXT
+      - name: city_name
+        type: TEXT
+      - name: time_recorded
+        type: TIMESTAMP
+      - name: temp_max_celcius
+        type: DOUBLE PRECISION
+      - name: temp_min_celcius
+        type: DOUBLE PRECISION
+      - name: precipitation_probability
+        type: DOUBLE PRECISION
+      - name: icon
+        type: TEXT
+      - name: icon_url
+        type: TEXT

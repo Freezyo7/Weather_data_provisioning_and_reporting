@@ -1,0 +1,114 @@
+transform_rules:
+  - add_dataframe: 
+      dataframe: 'df_pollution_weather_data'
+      file_path: 's3://weatherbucket-yml/weather_data/input/preprocessing/pollution/{processing_week}/'
+      file_name_hint: 'pollution_data_{current_date}'
+      file_type: 'csv'
+  
+  - drop_duplicate:
+      dataframe: 'df_pollution_weather_data'
+      keep: 'first'
+      subset: None
+
+  - drop_na:
+      dataframe: 'df_pollution_weather_data'
+      how: 'any'
+      subset: None
+      thresh: null
+  
+  - date_formatting:
+      dataframe: 'df_pollution_weather_data'
+      columns:
+      - source: dt
+        target: dt
+        format: "%Y-%m-%d"
+
+  - type_casting:
+      dataframe: 'df_pollution_weather_data'
+      dtype_mappings:
+        city: "string"
+        aqi: "int64"
+        co: "float64"
+        "no": "float64"
+        no2: "float64"
+        o3: "float64"
+        so2: "float64"
+        pm2_5: "float64"
+        pm10: "float64"
+        nh3: "float64"
+      
+  - derived_columns:
+      dataframe: 'df_pollution_weather_data'
+      rules :
+        aqi_des: |
+            np.select(
+                [
+                    df['aqi']==1, 
+                    df['aqi']==2, 
+                    df['aqi']==3, 
+                    df['aqi']==4, 
+                    df['aqi']==5
+                ],
+                [
+                    "Air quality is good", 
+                    "Fair air quality", 
+                    "Moderate pollution", 
+                    "Poor air quality. Wear N95 mask", 
+                    "Very poor. Stay indoors"
+                ],
+                default='health_advisory'
+            )
+        
+        pollution_source: |
+            np.select(
+                [
+                    (df['so2'] > 80) | (df['no2'] > 70),             # Industrial/Power Plant (NAAQS)
+                    (df['co'] > 2000) | (df['no'] > 40),            # Traffic/Combustion
+                    (df['pm10'] > 50) & (df['pm2_5'] < 25),         # Dust/Construction
+                    (df['pm2_5'] >= 50)  
+                ],
+                [
+                    "Industrial/Power Plant",
+                    "Traffic/Combustion",
+                    "Dust/Construction",
+                    "Fine particulate pollution"
+                ],
+                default="Mixed sources"
+            )
+        
+        city_date_key: |
+            df['city'].astype(str) + '_' + df['dt'].astype(str)
+
+  - handle_missing:
+      dataframe : 'df_pollution_weather_data'
+      method: drop  # or fill
+      fill_value: null'
+
+  - renaming_columns:
+      dataframe: 'df_pollution_weather_data'
+      rename_columns:
+        city: city_name
+        dt: time_recorded
+  
+  - drop_duplicate:
+      dataframe: 'df_pollution_weather_data'
+      subset: ['city_date_key']
+
+  - reorder_columns:
+      dataframe: 'df_pollution_weather_data'
+      columns:
+        - city_date_key
+        - city_name
+        - aqi
+        - aqi_des
+        - co
+        - "no"
+        - no2
+        - o3
+        - so2
+        - pm2_5
+        - pm10
+        - nh3
+        - pollution_source
+        - time_recorded
+
